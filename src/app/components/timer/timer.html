@@ -1,0 +1,97 @@
+<div class="space-y-6 pb-20">
+  <!-- Brew Method & Calculator -->
+  <section class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+    <div class="mb-4">
+      <label class="block text-slate-400 text-sm mb-1">選擇沖煮法</label>
+      <select [ngModel]="selectedMethodId()" (ngModelChange)="selectedMethodId.set($event)"
+              class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none font-bold">
+        <option *ngFor="let m of methods()" [value]="m.id">{{ m.name }}</option>
+      </select>
+      <p class="text-xs text-slate-500 mt-2" *ngIf="selectedMethod()">
+        {{ selectedMethod()?.description }}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+      <div>
+        <label class="block text-slate-400 text-sm mb-1">粉重 (g)</label>
+        <input type="number" [(ngModel)]="beanWeight" 
+               class="w-full bg-slate-700 text-white rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none">
+      </div>
+      <div class="flex flex-col justify-end pb-1">
+        <div class="flex justify-between text-xs text-slate-400 mb-1">
+          <span>建議水溫</span>
+          <span class="text-amber-400">{{ brewParams().temp }}°C</span>
+        </div>
+        <div class="flex justify-between text-xs text-slate-400">
+          <span>粉水比</span>
+          <span class="text-amber-400">{{ brewParams().ratio }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timer Section -->
+  <section class="bg-slate-800 p-8 rounded-xl border border-slate-700 text-center relative overflow-hidden">
+    <!-- Progress Bar -->
+    <div class="absolute top-0 left-0 w-full h-1 bg-slate-700">
+      <div class="h-full bg-amber-500 transition-all duration-1000"
+           [style.width.%]="progress()"></div> 
+    </div>
+
+    <div class="mb-2 text-slate-400 text-sm uppercase tracking-wider min-h-[20px]">
+      {{ status() === 'finished' ? '享用咖啡吧！' : currentStep()?.name || '準備中' }}
+    </div>
+    
+    <div class="text-7xl font-mono font-bold text-white mb-4 tracking-tight">
+      {{ formatTime(time()) }}
+    </div>
+
+    <div class="text-amber-400 text-xl font-medium mb-8 min-h-[28px]">
+      <span *ngIf="currentStep()?.type === 'pour'">
+        目標水量: {{ currentStep()?.waterEndTarget }}g
+      </span>
+      <span *ngIf="currentStep()?.type === 'wait'">
+        等待...
+      </span>
+    </div>
+
+    <div class="flex justify-center gap-4">
+      <button (click)="toggleTimer()" 
+              class="w-20 h-20 rounded-full flex items-center justify-center text-3xl transition transform active:scale-95"
+              [class.bg-green-600]="status() === 'idle' || status() === 'paused'"
+              [class.bg-yellow-600]="status() === 'running'"
+              [class.bg-slate-600]="status() === 'finished'">
+        {{ status() === 'running' ? '⏸' : '▶' }}
+      </button>
+      
+      <button (click)="reset()" 
+              class="w-20 h-20 rounded-full bg-slate-700 flex items-center justify-center text-2xl hover:bg-slate-600 transition">
+        ↺
+      </button>
+    </div>
+    
+    <div class="mt-6 text-sm text-slate-400 italic min-h-[20px]">
+      {{ currentStep()?.description }}
+    </div>
+  </section>
+  
+  <!-- Recipe Steps Preview -->
+   <section class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+      <h3 class="text-slate-400 text-sm font-bold mb-3 uppercase">沖煮計畫表</h3>
+      <div class="space-y-3">
+        <div *ngFor="let step of selectedMethod()?.steps; let i = index" 
+             class="flex justify-between items-center p-2 rounded"
+             [class.bg-slate-700]="currentStepIndex() === i && status() !== 'idle'">
+          <div class="flex items-center gap-3">
+             <span class="text-xs font-mono text-slate-500 w-4">{{ i + 1 }}</span>
+             <span class="text-slate-300">{{ step.name }}</span>
+          </div>
+          <div class="text-right">
+             <div class="text-slate-400 text-sm">{{ step.duration }}s</div>
+             <div *ngIf="step.waterEndTarget" class="text-amber-500 text-xs">至 {{ step.waterEndTarget }}g</div>
+          </div>
+        </div>
+      </div>
+   </section>
+</div>

@@ -1,0 +1,134 @@
+<div class="space-y-6 pb-20">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold text-amber-500">沖煮手法編輯</h2>
+    <button (click)="openAdd()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-lg font-bold hover:bg-amber-400 transition">
+      + 新增手法
+    </button>
+  </div>
+
+  <!-- Methods List -->
+  <div class="grid md:grid-cols-2 gap-4">
+    <div *ngFor="let m of methods()" class="bg-slate-800 p-5 rounded-xl border border-slate-700 flex flex-col justify-between group h-full">
+      <div>
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-bold text-lg text-slate-200">{{ m.name }}</h3>
+          <span class="text-xs px-2 py-0.5 rounded-full border border-slate-600 text-slate-400 capitalize">
+            {{ m.category }}
+          </span>
+        </div>
+        <p class="text-sm text-slate-400 mb-4 line-clamp-2">{{ m.description }}</p>
+        
+        <div class="grid grid-cols-3 gap-2 text-center text-xs text-slate-500 bg-slate-900/50 p-2 rounded-lg">
+          <div>
+            <div class="text-slate-400">水溫</div>
+            <div class="text-amber-500 font-bold">{{ m.recommendedTemp }}°C</div>
+          </div>
+          <div>
+            <div class="text-slate-400">粉水比</div>
+            <div class="text-amber-500 font-bold">1:{{ m.recommendedRatio }}</div>
+          </div>
+          <div>
+            <div class="text-slate-400">步驟數</div>
+            <div class="text-amber-500 font-bold">{{ m.steps.length }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-4 pt-4 border-t border-slate-700 justify-end">
+        <button (click)="openEdit(m)" class="px-3 py-1 text-slate-300 hover:text-amber-500 transition text-sm">
+          編輯詳情
+        </button>
+        <button (click)="delete(m.id)" class="px-3 py-1 text-slate-300 hover:text-red-500 transition text-sm">
+          刪除
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="isModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
+  <div class="bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-700 shadow-2xl p-6 my-8">
+    <h3 class="text-xl font-bold text-amber-500 mb-4">{{ isEditing() ? '編輯手法' : '新增手法' }}</h3>
+    
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Left: Basic Info -->
+      <div class="space-y-4">
+        <h4 class="text-slate-200 font-bold text-sm border-b border-slate-700 pb-1">基本資訊</h4>
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">名稱</label>
+          <input [(ngModel)]="form.name" type="text" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 focus:border-amber-500 outline-none">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-400 text-sm mb-1">類別</label>
+              <select [(ngModel)]="form.category" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+                <option value="drip">手沖 (Drip)</option>
+                <option value="immersion">浸泡 (Immersion)</option>
+                <option value="espresso">義式 (Espresso)</option>
+              </select>
+            </div>
+             <div>
+              <label class="block text-slate-400 text-sm mb-1">建議水溫</label>
+              <input [(ngModel)]="form.recommendedTemp" type="number" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+            </div>
+        </div>
+        
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">建議粉水比 (1:?)</label>
+          <input [(ngModel)]="form.recommendedRatio" type="number" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">簡介</label>
+          <textarea [(ngModel)]="form.description" rows="3" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none"></textarea>
+        </div>
+      </div>
+
+      <!-- Right: Steps Editor -->
+      <div class="space-y-4">
+         <div class="flex justify-between items-center border-b border-slate-700 pb-1">
+            <h4 class="text-slate-200 font-bold text-sm">步驟設定</h4>
+            <button (click)="addStep()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-500 px-2 py-1 rounded">+ 步驟</button>
+         </div>
+         
+         <div class="max-h-[300px] overflow-y-auto space-y-2 pr-2">
+            <div *ngFor="let step of tempSteps; let i = index" class="bg-slate-800 p-3 rounded border border-slate-700 relative group">
+               <button (click)="removeStep(i)" class="absolute top-1 right-1 text-slate-600 hover:text-red-500 px-2">×</button>
+               
+               <div class="grid grid-cols-2 gap-2 mb-2 pr-4">
+                  <input [(ngModel)]="step.name" placeholder="步驟名稱" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
+                  <select [(ngModel)]="step.type" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
+                    <option value="pour">注水 (Pour)</option>
+                    <option value="wait">等待 (Wait)</option>
+                  </select>
+               </div>
+               
+               <div class="grid grid-cols-2 gap-2 mb-2">
+                  <div class="flex items-center gap-1">
+                    <span class="text-xs text-slate-500">秒</span>
+                    <input [(ngModel)]="step.duration" type="number" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
+                  </div>
+                   <div class="flex items-center gap-1" *ngIf="step.type === 'pour'">
+                    <span class="text-xs text-slate-500">至(g)</span>
+                    <input [(ngModel)]="step.waterEndTarget" type="number" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
+                  </div>
+               </div>
+
+               <input [(ngModel)]="step.description" placeholder="提示 (如: 中心繞圈)" class="bg-slate-900 text-slate-400 text-xs rounded p-1 border border-slate-700 w-full">
+            </div>
+
+            <div *ngIf="tempSteps.length === 0" class="text-center text-slate-600 text-xs py-4">
+              還沒有步驟，點擊上方按鈕新增。
+            </div>
+         </div>
+      </div>
+    </div>
+
+    <div class="flex gap-4 mt-6 pt-4 border-t border-slate-700">
+      <button (click)="isModalOpen.set(false)" class="flex-1 bg-slate-800 text-slate-300 py-2 rounded-lg hover:bg-slate-700">取消</button>
+      <button (click)="save()" class="flex-1 bg-amber-500 text-slate-900 font-bold py-2 rounded-lg hover:bg-amber-400">儲存變更</button>
+    </div>
+  </div>
+</div>

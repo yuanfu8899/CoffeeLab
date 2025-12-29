@@ -1,0 +1,102 @@
+<div class="space-y-6 pb-20">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold text-amber-500">咖啡豆倉管理</h2>
+    <button (click)="openAdd()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-lg font-bold hover:bg-amber-400 transition">
+      + 新增豆子
+    </button>
+  </div>
+
+  <!-- Bean List -->
+  <div class="space-y-4">
+    <div *ngFor="let bean of beans()" class="bg-slate-800 p-5 rounded-xl border border-slate-700 flex justify-between items-center group relative overflow-hidden">
+      <!-- Status Indicator -->
+      <div class="absolute left-0 top-0 bottom-0 w-1" [class.bg-green-500]="bean.isActive" [class.bg-slate-600]="!bean.isActive"></div>
+      
+      <div class="flex-1 pl-4">
+        <div class="flex items-center gap-2 mb-1">
+          <h3 class="font-bold text-lg text-slate-200">{{ bean.name }}</h3>
+          <span class="text-xs px-2 py-0.5 rounded-full border border-slate-600 text-slate-400">
+            {{ 
+              bean.roastLevel === 'extralight' ? '極淺焙' : 
+              bean.roastLevel === 'light' ? '淺焙' : 
+              bean.roastLevel === 'medium' ? '中焙' : 
+              bean.roastLevel === 'mediumdark' ? '中深焙' : '深焙' 
+            }}
+          </span>
+        </div>
+        <div class="text-sm text-slate-400 mb-2">
+          {{ bean.shop || '未知店家' }} • 剩餘 {{ bean.weight }}g
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <span *ngFor="let note of bean.flavorNotes" class="text-xs bg-slate-700 text-amber-500 px-2 py-1 rounded">
+            {{ note }}
+          </span>
+        </div>
+      </div>
+
+      <div class="flex gap-2 ml-4">
+        <button (click)="openEdit(bean)" class="p-2 text-slate-400 hover:text-amber-500 transition">
+          ✎
+        </button>
+        <button (click)="delete(bean.id)" class="p-2 text-slate-400 hover:text-red-500 transition">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="beans().length === 0" class="text-center text-slate-500 py-10">
+      豆倉是空的，快去補貨吧！
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="isModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+  <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl p-6">
+    <h3 class="text-xl font-bold text-amber-500 mb-4">{{ isEditing() ? '編輯豆子' : '新增豆子' }}</h3>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-slate-400 text-sm mb-1">名稱</label>
+        <input [(ngModel)]="form.name" type="text" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 focus:border-amber-500 outline-none">
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">烘焙度</label>
+          <select [(ngModel)]="form.roastLevel" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+            <option value="extralight">極淺焙</option>
+            <option value="light">淺焙</option>
+            <option value="medium">中焙</option>
+            <option value="mediumdark">中深焙</option>
+            <option value="dark">深焙</option>
+          </select>
+        </div>
+        <div>
+           <label class="block text-slate-400 text-sm mb-1">重量 (g)</label>
+           <input [(ngModel)]="form.weight" type="number" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-slate-400 text-sm mb-1">店家</label>
+        <input [(ngModel)]="form.shop" type="text" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+      </div>
+
+      <div>
+        <label class="block text-slate-400 text-sm mb-1">風味描述 (用逗號分隔)</label>
+        <input [(ngModel)]="flavorInput" type="text" placeholder="花香, 柑橘, 蜂蜜" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input type="checkbox" [(ngModel)]="form.isActive" id="isActive" class="w-4 h-4 accent-amber-500">
+        <label for="isActive" class="text-slate-300">庫存中 (In Stock)</label>
+      </div>
+    </div>
+
+    <div class="flex gap-4 mt-6">
+      <button (click)="isModalOpen.set(false)" class="flex-1 bg-slate-800 text-slate-300 py-2 rounded-lg hover:bg-slate-700">取消</button>
+      <button (click)="save()" class="flex-1 bg-amber-500 text-slate-900 font-bold py-2 rounded-lg hover:bg-amber-400">儲存</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,172 @@
+<div class="space-y-6 pb-20">
+  <h2 class="text-2xl font-bold text-amber-500 mb-4">新增沖煮紀錄</h2>
+
+  <form (ngSubmit)="submit()" class="space-y-6">
+    
+    <!-- 1. Selection Section -->
+    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+      <h3 class="text-slate-200 font-semibold mb-2">基本資訊</h3>
+      
+      <!-- Bean Selector -->
+      <div>
+        <label class="block text-slate-400 text-sm mb-1">咖啡豆</label>
+        <select [(ngModel)]="record.beanId" name="beanId" required
+                class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none">
+          <option *ngFor="let b of beans()" [value]="b.id">{{ b.name }} ({{ b.roastLevel }})</option>
+        </select>
+      </div>
+
+      <!-- Method & Grinder -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">沖煮法</label>
+          <select [(ngModel)]="record.methodId" name="methodId" required
+                  class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none">
+            <option *ngFor="let m of methods()" [value]="m.id">{{ m.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">磨豆機</label>
+          <select [(ngModel)]="record.grinderId" name="grinderId" required
+                  class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none">
+            <option *ngFor="let g of grinders()" [value]="g.id">{{ g.name }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Parameters Section -->
+    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+      <h3 class="text-slate-200 font-semibold mb-2">沖煮參數</h3>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">研磨刻度</label>
+          <input type="number" [(ngModel)]="record.settingUsed" name="settingUsed" step="0.1" required
+                 class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-sm mb-1">水溫 (°C)</label>
+          <input type="number" [(ngModel)]="record.temperature" name="temperature" required
+                 class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <div>
+          <label class="block text-slate-400 text-xs mb-1">粉重 (g)</label>
+          <input type="number" [(ngModel)]="record.beanWeight" name="beanWeight"
+                 class="w-full bg-slate-700 text-white rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-xs mb-1">總水量 (g)</label>
+          <input type="number" [(ngModel)]="record.waterWeight" name="waterWeight"
+                 class="w-full bg-slate-700 text-white rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 text-xs mb-1">總時間</label>
+          <input type="text" [(ngModel)]="record.totalTime" name="totalTime" placeholder="MM:SS"
+                 class="w-full bg-slate-700 text-white rounded p-2 focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Sensory Profile (Explicit Grid Style to avoid TS7053) -->
+    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+      <h3 class="text-slate-200 font-semibold mb-4 flex justify-between items-center">
+        <span>風味評測 (1-5)</span>
+        <span class="text-xs text-slate-400">0.5 分為單位</span>
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Aroma -->
+        <div class="bg-slate-900/30 p-3 rounded-lg border border-slate-700/30 hover:border-amber-500/30 transition">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-slate-300">香氣 (Aroma)</span>
+            <span class="font-mono font-bold text-amber-400">{{ sensory.aroma | number:'1.1-1' }}</span>
+          </div>
+          <input type="range" min="1" max="5" step="0.5" [(ngModel)]="sensory.aroma" name="aroma" 
+                 class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+        </div>
+
+        <!-- Acidity -->
+        <div class="bg-slate-900/30 p-3 rounded-lg border border-slate-700/30 hover:border-amber-500/30 transition">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-slate-300">酸值 (Acidity)</span>
+            <span class="font-mono font-bold text-amber-400">{{ sensory.acidity | number:'1.1-1' }}</span>
+          </div>
+          <input type="range" min="1" max="5" step="0.5" [(ngModel)]="sensory.acidity" name="acidity" 
+                 class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+        </div>
+
+        <!-- Sweetness -->
+        <div class="bg-slate-900/30 p-3 rounded-lg border border-slate-700/30 hover:border-amber-500/30 transition">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-slate-300">甜感 (Sweetness)</span>
+            <span class="font-mono font-bold text-amber-400">{{ sensory.sweetness | number:'1.1-1' }}</span>
+          </div>
+          <input type="range" min="1" max="5" step="0.5" [(ngModel)]="sensory.sweetness" name="sweetness" 
+                 class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+        </div>
+
+        <!-- Body -->
+        <div class="bg-slate-900/30 p-3 rounded-lg border border-slate-700/30 hover:border-amber-500/30 transition">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-slate-300">醇厚 (Body)</span>
+            <span class="font-mono font-bold text-amber-400">{{ sensory.body | number:'1.1-1' }}</span>
+          </div>
+          <input type="range" min="1" max="5" step="0.5" [(ngModel)]="sensory.body" name="body" 
+                 class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+        </div>
+
+        <!-- Balance -->
+        <div class="bg-slate-900/30 p-3 rounded-lg border border-slate-700/30 hover:border-amber-500/30 transition">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-slate-300">平衡 (Balance)</span>
+            <span class="font-mono font-bold text-amber-400">{{ sensory.balance | number:'1.1-1' }}</span>
+          </div>
+          <input type="range" min="1" max="5" step="0.5" [(ngModel)]="sensory.balance" name="balance" 
+                 class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+        </div>
+
+        <!-- Aftertaste -->
+        <div class="bg-slate-900/30 p-3 rounded-lg border border-slate-700/30 hover:border-amber-500/30 transition">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-slate-300">餘韻 (Aftertaste)</span>
+            <span class="font-mono font-bold text-amber-400">{{ sensory.aftertaste | number:'1.1-1' }}</span>
+          </div>
+          <input type="range" min="1" max="5" step="0.5" [(ngModel)]="sensory.aftertaste" name="aftertaste" 
+                 class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+        </div>
+        
+        <!-- Overall -->
+        <div class="md:col-span-2 bg-slate-900/50 p-4 rounded-lg border border-slate-700/50">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-amber-500 font-bold">整體評價 (Overall)</span>
+            <span class="font-mono font-bold text-amber-500 text-lg">{{ sensory.overall | number:'1.1-1' }}</span>
+          </div>
+          <input type="range" min="1" max="5" step="0.5" [(ngModel)]="sensory.overall" name="overall" 
+                 class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+          <div class="flex justify-between text-xs text-slate-500 mt-1">
+            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Notes -->
+      <div class="mt-6">
+        <label class="block text-slate-400 text-sm mb-1">詳細筆記</label>
+        <textarea [(ngModel)]="record.notes" name="notes" rows="3" placeholder="描述風味細節，例如：前段帶有茉莉花香，中段明亮檸檬酸..."
+                  class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="isSubmitting"
+            class="w-full bg-amber-500 text-slate-900 font-bold py-3 rounded-lg hover:bg-amber-400 transition disabled:opacity-50 shadow-lg shadow-amber-500/20">
+      {{ isSubmitting ? '傳送中...' : '儲存完整紀錄' }}
+    </button>
+
+  </form>
+</div>

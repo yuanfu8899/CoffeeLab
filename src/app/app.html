@@ -1,0 +1,49 @@
+<div class="min-h-screen bg-slate-900 text-slate-200 font-sans pb-20 md:pb-0 md:pt-16">
+  <!-- Desktop Header -->
+  <header class="hidden md:flex fixed top-0 w-full h-16 bg-slate-800 border-b border-slate-700 items-center px-6 justify-between z-50">
+    <div class="text-xl font-bold text-amber-500 flex items-center gap-2">
+      ☕ 咖啡實驗室
+    </div>
+    <nav class="flex gap-6 text-sm">
+      <a routerLink="/converter" routerLinkActive="text-amber-500" class="hover:text-amber-400 transition">磨豆刻度</a>
+      <a routerLink="/timer" routerLinkActive="text-amber-500" class="hover:text-amber-400 transition">智能沖煮</a>
+      <a routerLink="/beans" routerLinkActive="text-amber-500" class="hover:text-amber-400 transition">豆倉管理</a>
+      <a routerLink="/methods" routerLinkActive="text-amber-500" class="hover:text-amber-400 transition">沖煮手法</a>
+      <a routerLink="/history" routerLinkActive="text-amber-500" class="hover:text-amber-400 transition">品飲紀錄</a>
+      <a routerLink="/settings" routerLinkActive="text-amber-500" class="hover:text-amber-400 transition">設定</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="p-4 md:p-8 max-w-4xl mx-auto">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="md:hidden fixed bottom-0 w-full h-16 bg-slate-800 border-t border-slate-700 flex justify-around items-center z-50 overflow-x-auto px-2">
+    <a routerLink="/converter" routerLinkActive="text-amber-500" class="flex flex-col items-center min-w-[60px] text-[10px] gap-1 text-slate-400">
+      <span class="text-xl">⚙️</span>
+      <span>刻度</span>
+    </a>
+    <a routerLink="/timer" routerLinkActive="text-amber-500" class="flex flex-col items-center min-w-[60px] text-[10px] gap-1 text-slate-400">
+      <span class="text-xl">⏱️</span>
+      <span>沖煮</span>
+    </a>
+    <a routerLink="/beans" routerLinkActive="text-amber-500" class="flex flex-col items-center min-w-[60px] text-[10px] gap-1 text-slate-400">
+      <span class="text-xl">🫘</span>
+      <span>豆倉</span>
+    </a>
+    <a routerLink="/methods" routerLinkActive="text-amber-500" class="flex flex-col items-center min-w-[60px] text-[10px] gap-1 text-slate-400">
+      <span class="text-xl">📝</span>
+      <span>手法</span>
+    </a>
+    <a routerLink="/history" routerLinkActive="text-amber-500" class="flex flex-col items-center min-w-[60px] text-[10px] gap-1 text-slate-400">
+      <span class="text-xl">📜</span>
+      <span>紀錄</span>
+    </a>
+    <a routerLink="/settings" routerLinkActive="text-amber-500" class="flex flex-col items-center min-w-[60px] text-[10px] gap-1 text-slate-400">
+      <span class="text-xl">🔧</span>
+      <span>設定</span>
+    </a>
+  </nav>
+</div>

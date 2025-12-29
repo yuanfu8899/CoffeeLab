@@ -1,0 +1,27 @@
+<div class="space-y-6">
+  <h2 class="text-2xl font-bold text-amber-500 mb-4">磨豆機刻度對照</h2>
+
+  <!-- Brew Method Selector -->
+  <div class="flex flex-wrap gap-2 justify-center bg-slate-800 p-2 rounded-xl">
+    <button *ngFor="let method of brewMethods"
+            (click)="selectMethod(method)"
+            [class.bg-amber-500]="selectedMethod() === method"
+            [class.text-slate-900]="selectedMethod() === method"
+            [class.text-slate-300]="selectedMethod() !== method"
+            class="px-4 py-2 rounded-lg font-medium transition hover:bg-slate-700 focus:outline-none">
+      {{ formatMethodName(method) }}
+    </button>
+  </div>
+
+  <!-- Results Grid -->
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div *ngFor="let item of grinders()" class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+      <h3 class="text-lg font-semibold text-slate-200 mb-1">{{ item.name }}</h3>
+      <div class="text-3xl font-bold text-amber-400 mb-2">
+        {{ item.range }}
+      </div>
+      <p class="text-xs text-slate-400 font-mono">{{ item.description }}</p>
+      <p class="text-sm text-slate-500 mt-2">建議刻度範圍</p>
+    </div>
+  </div>
+</div>
