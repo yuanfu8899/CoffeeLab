@@ -31,10 +31,15 @@ export class SettingsComponent {
   saveConfig() {
     this.sheetsService.setApiUrl(this.apiUrl);
     Swal.fire({
-      title: '設定已儲存',
-      text: '您的配置已更新。',
+      toast: true,
+      position: 'bottom-end',
       icon: 'success',
-      confirmButtonColor: '#f59e0b',
+      title: '設定已儲存',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      background: '#1e293b',
+      color: '#e2e8f0'
     });
   }
 

@@ -16,7 +16,7 @@ export class RepositoryService {
       name: '泰摩 S3',
       defaultSetting: 7,
       minSetting: 0,
-      maxSetting: 12,
+      maxSetting: 9,
       step: 0.1,
       ranges: { espresso: [0.5, 1.5], pourOver: [5.5, 7.5], frenchPress: [8.0, 9.0] }
     },

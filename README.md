@@ -36,6 +36,17 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## ☁️ Backend Setup (Google Sheets)
+
+To enable cloud sync features (Logs, Inventory, Recipes), you need to deploy a Google Apps Script.
+
+👉 **[Click here for the Setup Guide](Template/SETUP_GUIDE.md)**
+
+1. Create a Google Sheet.
+2. Copy the code from `Template/code.gs`.
+3. Deploy as a Web App (Access: Anyone).
+4. Paste the URL into the App Settings.
+
 ## Running unit tests
 
 To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
