@@ -19,6 +19,11 @@ export class GoogleSheetsService {
     localStorage.setItem(this.STORAGE_KEY, url);
   }
 
+  clearApiUrl() {
+    this.apiUrl.set('');
+    localStorage.removeItem(this.STORAGE_KEY);
+  }
+
   /**
    * 依照後端 code.gs 規範發送資料
    * @param type 'LOG' | 'BEAN' | 'GRINDER' | 'METHOD'

@@ -12,9 +12,14 @@
     <input type="text" [(ngModel)]="apiUrl" placeholder="https://script.google.com/macros/s/..."
            class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none mb-4">
     
-    <button (click)='saveConfig()' class="w-full bg-amber-500 text-slate-900 font-bold py-3 rounded-lg hover:bg-amber-400 transition">
-      儲存配置
-    </button>
+    <div class="flex gap-4">
+      <button (click)='clearConfig()' class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-red-900/50 hover:text-red-400 transition">
+        解除連結
+      </button>
+      <button (click)='saveConfig()' class="flex-[2] bg-amber-500 text-slate-900 font-bold py-3 rounded-lg hover:bg-amber-400 transition">
+        儲存配置
+      </button>
+    </div>
   </div>
 
   <!-- 2. Grinder Management -->

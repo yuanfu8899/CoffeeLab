@@ -43,6 +43,36 @@ export class SettingsComponent {
     });
   }
 
+  clearConfig() {
+    Swal.fire({
+      title: '確定解除連結?',
+      text: '這將會移除本機儲存的 API URL，您將無法同步資料到 Google Sheets。',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '確定移除',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#ef4444',
+      background: '#1e293b',
+      color: '#e2e8f0'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.sheetsService.clearApiUrl();
+        this.apiUrl = '';
+        Swal.fire({
+          toast: true,
+          position: 'bottom-end',
+          icon: 'success',
+          title: '已解除連結',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          background: '#1e293b',
+          color: '#e2e8f0'
+        });
+      }
+    });
+  }
+
   // Grinder CRUD
   openAddGrinder() {
     this.isEditing.set(false);
