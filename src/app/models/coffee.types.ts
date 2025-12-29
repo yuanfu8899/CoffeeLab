@@ -4,7 +4,8 @@ export type BrewMethodCategory = 'drip' | 'immersion' | 'espresso' | 'hybrid';
 export interface BrewStep {
   name: string;
   type: 'pour' | 'wait';
-  waterEndTarget?: number; // Cumulative
+  waterEndTarget?: number; // Cumulative (absolute grams)
+  waterEndTargetRatio?: number; // Cumulative (ratio multiplier relative to dose, e.g., 2, 6, 12, 15)
   duration: number; // Seconds
   description?: string;
 }

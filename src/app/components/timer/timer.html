@@ -49,7 +49,7 @@
 
     <div class="text-amber-400 text-xl font-medium mb-8 min-h-[28px]">
       <span *ngIf="currentStep()?.type === 'pour'">
-        目標水量: {{ currentStep()?.waterEndTarget }}g
+        目標水量: {{ currentStepWaterTarget() }}g
       </span>
       <span *ngIf="currentStep()?.type === 'wait'">
         等待...
@@ -89,7 +89,7 @@
           </div>
           <div class="text-right">
              <div class="text-slate-400 text-sm">{{ step.duration }}s</div>
-             <div *ngIf="step.waterEndTarget" class="text-amber-500 text-xs">至 {{ step.waterEndTarget }}g</div>
+             <div *ngIf="getStepWaterTarget(step)" class="text-amber-500 text-xs">至 {{ getStepWaterTarget(step) }}g</div>
           </div>
         </div>
       </div>

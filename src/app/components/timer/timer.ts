@@ -2,6 +2,7 @@ import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RepositoryService } from '../../services/repository';
+import { BrewLogicService } from '../../services/brew-logic';
 import { BrewStep, BrewMethod } from '../../models/coffee.types';
 import { Subscription, interval } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -14,6 +15,7 @@ import Swal from 'sweetalert2';
 })
 export class TimerComponent implements OnDestroy {
   private repo = inject(RepositoryService);
+  private brewLogic = inject(BrewLogicService);
 
   // Selections
   methods = this.repo.methods;
@@ -56,6 +58,18 @@ export class TimerComponent implements OnDestroy {
     const steps = this.selectedMethod()?.steps;
     return steps ? steps[this.currentStepIndex()] : undefined;
   });
+
+  // Effective water target for current step
+  currentStepWaterTarget = computed(() => {
+    const step = this.currentStep();
+    if (!step) return undefined;
+    return this.brewLogic.getEffectiveWaterTarget(step, this.beanWeight());
+  });
+
+  // Get effective water target for any step
+  getStepWaterTarget(step: BrewStep): number | undefined {
+    return this.brewLogic.getEffectiveWaterTarget(step, this.beanWeight());
+  }
   
   // Progress Calculation
   progress = computed(() => {

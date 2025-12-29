@@ -31,9 +31,50 @@ export class RepositoryService {
     }
   ];
 
+  private defaultMethods: BrewMethod[] = [
+    {
+      id: 'method-ratio-based',
+      name: 'V60 四段注水 (比例式)',
+      category: 'drip',
+      recommendedTemp: 92,
+      recommendedRatio: 15,
+      description: '適用 1:15 粉水比，使用倍率自動計算水量。建議粉量 15-20g。',
+      steps: [
+        {
+          name: '悶蒸',
+          type: 'pour',
+          waterEndTargetRatio: 2,
+          duration: 30,
+          description: '輕柔注水，確保粉層濕潤'
+        },
+        {
+          name: '第一段',
+          type: 'pour',
+          waterEndTargetRatio: 6,
+          duration: 40,
+          description: '中心繞圈至外圍'
+        },
+        {
+          name: '第二段',
+          type: 'pour',
+          waterEndTargetRatio: 12,
+          duration: 40,
+          description: '穩定水流，保持粉床平整'
+        },
+        {
+          name: '第三段',
+          type: 'pour',
+          waterEndTargetRatio: 15,
+          duration: 40,
+          description: '最後注水至目標總重'
+        }
+      ]
+    }
+  ];
+
   // Signals
   beans = signal<CoffeeBean[]>(this.load(this.STORAGE_KEY_BEANS, []));
-  methods = signal<BrewMethod[]>(this.load(this.STORAGE_KEY_METHODS, []));
+  methods = signal<BrewMethod[]>(this.load(this.STORAGE_KEY_METHODS, this.defaultMethods));
   grinders = signal<GrinderProfile[]>(this.load(this.STORAGE_KEY_GRINDERS, this.defaultGrinders));
   
   constructor() {
@@ -46,10 +87,6 @@ export class RepositoryService {
   private load<T>(key: string, defaultData: T): T {
     const saved = localStorage.getItem(key);
     if (saved) return JSON.parse(saved);
-    
-    // For beans and methods, if empty and first time, maybe return empty or a small default
-    if (key === this.STORAGE_KEY_BEANS && !saved) return [] as any; 
-    if (key === this.STORAGE_KEY_METHODS && !saved) return [] as any;
     
     return defaultData;
   }
