@@ -8,9 +8,20 @@
       請部署一個與您的試算表相連的 Google Apps Script 網頁應用程式 (Web App)，並將產生的 URL 貼在下方。
     </p>
 
-    <label class="block text-slate-300 text-sm mb-1">網頁應用程式 URL</label>
-    <input type="text" [ngModel]="apiUrlSignal()" (ngModelChange)="apiUrlSignal.set($event)" placeholder="https://script.google.com/macros/s/..."
-           class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none mb-4">
+    <label class="block text-slate-300 text-sm mb-1 flex justify-between items-center">
+      <span>網頁應用程式 URL</span>
+      <span *ngIf="!apiUrlSignal()" class="text-[10px] bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded border border-amber-500/30 animate-pulse">
+        尚未設定
+      </span>
+      <span *ngIf="apiUrlSignal()" class="text-[10px] bg-green-500/20 text-green-500 px-2 py-0.5 rounded border border-green-500/30">
+        已連結
+      </span>
+    </label>
+    <input type="text" [ngModel]="apiUrlSignal()" (ngModelChange)="apiUrlSignal.set($event)" 
+           placeholder="請貼上 https://script.google.com/macros/s/..."
+           [class.border-amber-500]="!apiUrlSignal()"
+           [class.border-slate-700]="apiUrlSignal()"
+           class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none mb-4 border placeholder:text-slate-500 transition-colors">
     
     <div class="flex gap-4">
       <button (click)='clearConfig()' class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-red-900/50 hover:text-red-400 transition">
