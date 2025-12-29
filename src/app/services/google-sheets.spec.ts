@@ -1,13 +1,20 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideZonelessChangeDetection } from '@angular/core';
 
-import { GoogleSheets } from './google-sheets';
+import { GoogleSheetsService } from './google-sheets';
 
-describe('GoogleSheets', () => {
-  let service: GoogleSheets;
+describe('GoogleSheetsService', () => {
+  let service: GoogleSheetsService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(GoogleSheets);
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient()
+      ]
+    });
+    service = TestBed.inject(GoogleSheetsService);
   });
 
   it('should be created', () => {

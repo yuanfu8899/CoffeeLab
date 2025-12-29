@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { Layout } from './layout';
 
@@ -8,7 +9,8 @@ describe('Layout', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Layout]
+      imports: [Layout],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

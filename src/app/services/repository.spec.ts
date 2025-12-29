@@ -1,13 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
-import { Repository } from './repository';
+import { RepositoryService } from './repository';
 
-describe('Repository', () => {
-  let service: Repository;
+describe('RepositoryService', () => {
+  let service: RepositoryService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Repository);
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection()
+      ]
+    });
+    service = TestBed.inject(RepositoryService);
   });
 
   it('should be created', () => {

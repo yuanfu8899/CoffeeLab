@@ -1,18 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
-import { Converter } from './converter';
+import { ConverterComponent } from './converter';
 
-describe('Converter', () => {
-  let component: Converter;
-  let fixture: ComponentFixture<Converter>;
+describe('ConverterComponent', () => {
+  let component: ConverterComponent;
+  let fixture: ComponentFixture<ConverterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Converter]
+      imports: [ConverterComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Converter);
+    fixture = TestBed.createComponent(ConverterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
