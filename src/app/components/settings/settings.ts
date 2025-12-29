@@ -16,7 +16,8 @@ export class SettingsComponent {
   sheetsService = inject(GoogleSheetsService);
   repo = inject(RepositoryService);
   
-  apiUrl = '';
+  // Use a signal for the input to ensure zoneless change detection works correctly
+  apiUrlSignal = signal('');
   
   // Grinder Management State
   grinders = this.repo.grinders;
@@ -25,11 +26,11 @@ export class SettingsComponent {
   form: Partial<GrinderProfile> = {};
 
   constructor() {
-    this.apiUrl = this.sheetsService.apiUrl();
+    this.apiUrlSignal.set(this.sheetsService.apiUrl());
   }
 
   saveConfig() {
-    this.sheetsService.setApiUrl(this.apiUrl);
+    this.sheetsService.setApiUrl(this.apiUrlSignal());
     Swal.fire({
       toast: true,
       position: 'bottom-end',
@@ -57,7 +58,7 @@ export class SettingsComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.sheetsService.clearApiUrl();
-        this.apiUrl = '';
+        this.apiUrlSignal.set('');
         Swal.fire({
           toast: true,
           position: 'bottom-end',

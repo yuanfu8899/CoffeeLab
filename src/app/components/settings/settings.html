@@ -9,7 +9,7 @@
     </p>
 
     <label class="block text-slate-300 text-sm mb-1">網頁應用程式 URL</label>
-    <input type="text" [(ngModel)]="apiUrl" placeholder="https://script.google.com/macros/s/..."
+    <input type="text" [ngModel]="apiUrlSignal()" (ngModelChange)="apiUrlSignal.set($event)" placeholder="https://script.google.com/macros/s/..."
            class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none mb-4">
     
     <div class="flex gap-4">
