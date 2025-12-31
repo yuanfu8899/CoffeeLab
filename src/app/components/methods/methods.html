@@ -48,87 +48,197 @@
 
 <!-- Modal -->
 <div *ngIf="isModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
-  <div class="bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-700 shadow-2xl p-6 my-8">
-    <h3 class="text-xl font-bold text-amber-500 mb-4">{{ isEditing() ? '編輯手法' : '新增手法' }}</h3>
-    
-    <div class="grid md:grid-cols-2 gap-6">
-      <!-- Left: Basic Info -->
+  <div class="bg-slate-900 w-full max-w-3xl rounded-2xl border border-slate-700 shadow-2xl p-6 my-8">
+    <h3 class="text-xl font-bold text-amber-500 mb-6">{{ isEditing() ? '編輯手法' : '新增手法' }}</h3>
+
+    <div class="space-y-6">
+      <!-- 基本資訊區塊 -->
       <div class="space-y-4">
-        <h4 class="text-slate-200 font-bold text-sm border-b border-slate-700 pb-1">基本資訊</h4>
-        <div>
-          <label class="block text-slate-400 text-sm mb-1">名稱</label>
-          <input [(ngModel)]="form.name" type="text" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 focus:border-amber-500 outline-none">
-        </div>
-        
-        <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-slate-400 text-sm mb-1">類別</label>
-              <select [(ngModel)]="form.category" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
-                <option value="drip">手沖 (Drip)</option>
-                <option value="immersion">浸泡 (Immersion)</option>
-                <option value="espresso">義式 (Espresso)</option>
-              </select>
-            </div>
-             <div>
-              <label class="block text-slate-400 text-sm mb-1">建議水溫</label>
-              <input [(ngModel)]="form.recommendedTemp" type="number" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
-            </div>
-        </div>
-        
-        <div>
-          <label class="block text-slate-400 text-sm mb-1">建議粉水比 (1:?)</label>
-          <input [(ngModel)]="form.recommendedRatio" type="number" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+        <h4 class="text-slate-200 font-bold text-sm border-b border-slate-700 pb-2 mb-4">基本資訊</h4>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-slate-400 text-sm mb-1">名稱</label>
+            <input [(ngModel)]="form.name" type="text" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 focus:border-amber-500 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-slate-400 text-sm mb-1">類別</label>
+            <select [(ngModel)]="form.category" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+              <option value="drip">手沖 (Drip)</option>
+              <option value="immersion">浸泡 (Immersion)</option>
+              <option value="espresso">義式 (Espresso)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-400 text-sm mb-1">建議水溫</label>
+            <input [(ngModel)]="form.recommendedTemp" type="number" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-slate-400 text-sm mb-1">建議粉水比 (1:?)</label>
+            <input [(ngModel)]="form.recommendedRatio" type="number" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none">
+          </div>
         </div>
 
         <div>
           <label class="block text-slate-400 text-sm mb-1">簡介</label>
-          <textarea [(ngModel)]="form.description" rows="3" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none"></textarea>
+          <textarea [(ngModel)]="form.description" rows="2" class="w-full bg-slate-800 text-white rounded p-2 border border-slate-700 outline-none resize-none"></textarea>
         </div>
       </div>
 
-      <!-- Right: Steps Editor -->
+      <!-- 步驟設定區塊 -->
       <div class="space-y-4">
-         <div class="flex justify-between items-center border-b border-slate-700 pb-1">
+         <div class="flex justify-between items-center border-b border-slate-700 pb-2">
             <h4 class="text-slate-200 font-bold text-sm">步驟設定</h4>
-            <button (click)="addStep()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-500 px-2 py-1 rounded">+ 步驟</button>
+            <div class="flex items-center gap-3">
+              <!-- 輸入模式切換 -->
+              <div class="flex items-center gap-2 bg-slate-800 rounded px-2 py-1">
+                <button type="button"
+                        (click)="inputMode.set('cumulative')"
+                        [class.bg-amber-600]="inputMode() === 'cumulative'"
+                        [class.text-slate-900]="inputMode() === 'cumulative'"
+                        [class.text-slate-400]="inputMode() !== 'cumulative'"
+                        class="px-2 py-0.5 rounded text-xs font-medium transition-colors">
+                  Σ 累積
+                </button>
+                <button type="button"
+                        (click)="inputMode.set('incremental')"
+                        [class.bg-amber-600]="inputMode() === 'incremental'"
+                        [class.text-slate-900]="inputMode() === 'incremental'"
+                        [class.text-slate-400]="inputMode() !== 'incremental'"
+                        class="px-2 py-0.5 rounded text-xs font-medium transition-colors">
+                  Δ 增量
+                </button>
+              </div>
+
+              <!-- 預覽粉量 -->
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-slate-400">預覽粉量：</label>
+                <input [(ngModel)]="previewDose" type="number" min="1" step="1"
+                       class="w-16 bg-slate-800 text-white text-sm rounded px-2 py-1 border border-slate-700">
+                <span class="text-xs text-slate-400">g</span>
+              </div>
+
+              <button (click)="addStep()" class="text-sm bg-amber-600 hover:bg-amber-500 text-slate-900 font-medium px-3 py-1.5 rounded transition-colors">+ 新增步驟</button>
+            </div>
          </div>
-         
-         <div class="max-h-[300px] overflow-y-auto space-y-2 pr-2">
+
+         <div class="max-h-[450px] overflow-y-auto space-y-3 pr-2">
             <div *ngFor="let step of tempSteps; let i = index" class="bg-slate-800 p-3 rounded border border-slate-700 relative group">
                <button (click)="removeStep(i)" class="absolute top-1 right-1 text-slate-600 hover:text-red-500 px-2">×</button>
-               
+
                <div class="grid grid-cols-2 gap-2 mb-2 pr-4">
                   <input [(ngModel)]="step.name" placeholder="步驟名稱" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
                   <select [(ngModel)]="step.type" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
-                    <option value="pour">注水 (Pour)</option>
-                    <option value="wait">等待 (Wait)</option>
+                    <option value="pour">注水</option>
+                    <option value="wait">等待</option>
                   </select>
                </div>
-               
+
                <div class="grid grid-cols-2 gap-2 mb-2">
                   <div class="flex items-center gap-1">
-                    <span class="text-xs text-slate-500">秒</span>
-                    <input [(ngModel)]="step.duration" type="number" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
+                    <input [(ngModel)]="step.duration" type="number" min="1" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
+                    <span class="text-[10px] text-slate-500">秒</span>
                   </div>
-                   <div class="flex items-center gap-1" *ngIf="step.type === 'pour'">
-                    <span class="text-xs text-slate-500">至(g)</span>
-                    <input [(ngModel)]="step.waterEndTarget" type="number" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full">
-                  </div>
+                  <div></div>
                </div>
 
-               <div *ngIf="step.type === 'pour'" class="mb-2">
-                 <div class="flex items-center gap-1">
-                   <span class="text-xs text-slate-500">或倍率</span>
-                   <input [(ngModel)]="step.waterEndTargetRatio" type="number" step="0.1" class="bg-slate-900 text-white text-sm rounded p-1 border border-slate-700 w-full" placeholder="如 2, 6, 12, 15">
+               <!-- 水量輸入：按鈕切換模式 -->
+               <div *ngIf="step.type === 'pour'" class="space-y-2">
+                 <!-- 模式切換按鈕 -->
+                 <div class="flex gap-2">
+                   <button type="button"
+                           (click)="setStepMode(i, 'ratio')"
+                           [class.bg-amber-600]="isRatioMode(step)"
+                           [class.bg-slate-700]="!isRatioMode(step)"
+                           [class.text-slate-900]="isRatioMode(step)"
+                           [class.text-slate-300]="!isRatioMode(step)"
+                           class="flex-1 px-3 py-1 rounded text-sm font-medium transition-colors">
+                     倍率模式
+                   </button>
+                   <button type="button"
+                           (click)="setStepMode(i, 'absolute')"
+                           [class.bg-amber-600]="!isRatioMode(step)"
+                           [class.bg-slate-700]="isRatioMode(step)"
+                           [class.text-slate-900]="!isRatioMode(step)"
+                           [class.text-slate-300]="isRatioMode(step)"
+                           class="flex-1 px-3 py-1 rounded text-sm font-medium transition-colors">
+                     絕對值模式
+                   </button>
                  </div>
-                 <p class="text-[10px] text-slate-600 mt-0.5">可填 2、6、12、15 表示目標總重 = 粉量×倍率</p>
+
+                 <!-- 倍率輸入：根據 inputMode 顯示累積或增量 -->
+                 <div *ngIf="isRatioMode(step)">
+                   <!-- 累積倍率輸入 -->
+                   <div *ngIf="inputMode() === 'cumulative'">
+                     <div class="grid grid-cols-2 gap-2">
+                       <div class="flex items-center gap-1">
+                         <span class="text-[10px] text-slate-500 whitespace-nowrap">累積 ×</span>
+                         <input [(ngModel)]="step.waterEndTargetRatio"
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                class="flex-1 bg-slate-900 text-white text-sm rounded p-1 border border-slate-700"
+                                placeholder="倍率">
+                       </div>
+                       <!-- 即時預覽：顯示累積和增量 -->
+                       <div *ngIf="step.waterEndTargetRatio && step.waterEndTargetRatio > 0" class="flex items-center text-xs text-slate-400 space-x-2">
+                         <span>💡 累積 {{ (step.waterEndTargetRatio * previewDose()) | number:'1.0-1' }}g</span>
+                         <span class="text-amber-400">
+                           本段 +{{ (getIncrementalRatio(i) * previewDose()) | number:'1.0-1' }}g
+                         </span>
+                       </div>
+                     </div>
+                   </div>
+
+                   <!-- 增量倍率輸入 -->
+                   <div *ngIf="inputMode() === 'incremental'">
+                     <div class="grid grid-cols-2 gap-2">
+                       <div class="flex items-center gap-1">
+                         <span class="text-[10px] text-slate-500 whitespace-nowrap">本段 ×</span>
+                         <input [ngModel]="getIncrementalRatio(i)"
+                                (ngModelChange)="setIncrementalRatio(i, $event)"
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                class="flex-1 bg-slate-900 text-white text-sm rounded p-1 border border-slate-700"
+                                placeholder="倍率">
+                       </div>
+                       <!-- 即時預覽：顯示增量和累積 -->
+                       <div *ngIf="getIncrementalRatio(i) > 0" class="flex items-center text-xs text-slate-400 space-x-2">
+                         <span>💡 本段 {{ (getIncrementalRatio(i) * previewDose()) | number:'1.0-1' }}g</span>
+                         <span class="text-amber-400" *ngIf="step.waterEndTargetRatio">
+                           累積 {{ (step.waterEndTargetRatio * previewDose()) | number:'1.0-1' }}g
+                         </span>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+                 <!-- 絕對值輸入 -->
+                 <div *ngIf="!isRatioMode(step)">
+                   <div class="grid grid-cols-2 gap-2">
+                     <div class="flex items-center gap-1">
+                       <span class="text-[10px] text-slate-500 whitespace-nowrap">累積至</span>
+                       <input [(ngModel)]="step.waterEndTarget"
+                              type="number"
+                              min="0"
+                              step="5"
+                              class="flex-1 bg-slate-900 text-white text-sm rounded p-1 border border-slate-700"
+                              placeholder="總水量">
+                       <span class="text-[10px] text-slate-500">g</span>
+                     </div>
+                     <div></div>
+                   </div>
+                 </div>
                </div>
 
                <input [(ngModel)]="step.description" placeholder="提示 (如: 中心繞圈)" class="bg-slate-900 text-slate-400 text-xs rounded p-1 border border-slate-700 w-full">
             </div>
 
-            <div *ngIf="tempSteps.length === 0" class="text-center text-slate-600 text-xs py-4">
-              還沒有步驟，點擊上方按鈕新增。
+            <div *ngIf="tempSteps.length === 0" class="text-center text-slate-500 text-sm py-8 border-2 border-dashed border-slate-700 rounded-lg">
+              還沒有步驟，點擊上方「+ 新增步驟」按鈕開始建立。
             </div>
          </div>
       </div>

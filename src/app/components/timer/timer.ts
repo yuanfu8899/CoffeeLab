@@ -66,9 +66,43 @@ export class TimerComponent implements OnDestroy {
     return this.brewLogic.getEffectiveWaterTarget(step, this.beanWeight());
   });
 
+  // Incremental water amount for current step (actual water to add this step)
+  currentStepIncremental = computed(() => {
+    const steps = this.selectedMethod()?.steps || [];
+    const index = this.currentStepIndex();
+
+    if (index < 0 || !steps[index]) return 0;
+
+    return this.brewLogic.getIncrementalWaterAmount(
+      steps,
+      index,
+      this.beanWeight()
+    );
+  });
+
+  // Total water weight for the selected method
+  totalWaterWeight = computed(() => {
+    const method = this.selectedMethod();
+    if (!method) return 0;
+
+    return this.brewLogic.getTotalWaterWeight(method, this.beanWeight());
+  });
+
   // Get effective water target for any step
   getStepWaterTarget(step: BrewStep): number | undefined {
     return this.brewLogic.getEffectiveWaterTarget(step, this.beanWeight());
+  }
+
+  // Get incremental water amount for any step (for recipe preview)
+  getStepIncremental(stepIndex: number): number {
+    const steps = this.selectedMethod()?.steps || [];
+    if (stepIndex < 0 || stepIndex >= steps.length) return 0;
+
+    return this.brewLogic.getIncrementalWaterAmount(
+      steps,
+      stepIndex,
+      this.beanWeight()
+    );
   }
   
   // Progress Calculation

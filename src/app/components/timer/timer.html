@@ -47,12 +47,23 @@
       {{ formatTime(time()) }}
     </div>
 
-    <div class="text-amber-400 text-xl font-medium mb-8 min-h-[28px]">
+    <div class="text-amber-400 text-xl font-medium mb-2 min-h-[28px]">
       <span *ngIf="currentStep()?.type === 'pour'">
-        目標水量: {{ currentStepWaterTarget() }}g
+        累積 {{ currentStepWaterTarget() }}g
+        <span class="text-base opacity-80 ml-1" *ngIf="currentStepIncremental() > 0">
+          (本段 +{{ currentStepIncremental() }}g)
+        </span>
       </span>
       <span *ngIf="currentStep()?.type === 'wait'">
         等待...
+      </span>
+    </div>
+
+    <!-- 進度顯示 -->
+    <div class="text-slate-400 text-sm mb-6" *ngIf="currentStep()?.type === 'pour' && totalWaterWeight() > 0">
+      進度: {{ currentStepWaterTarget() }}g / {{ totalWaterWeight() }}g
+      <span class="text-slate-500 ml-2">
+        ({{ (currentStepWaterTarget()! / totalWaterWeight() * 100) | number:'1.0-0' }}%)
       </span>
     </div>
 
@@ -89,7 +100,12 @@
           </div>
           <div class="text-right">
              <div class="text-slate-400 text-sm">{{ step.duration }}s</div>
-             <div *ngIf="getStepWaterTarget(step)" class="text-amber-500 text-xs">至 {{ getStepWaterTarget(step) }}g</div>
+             <div *ngIf="getStepWaterTarget(step)" class="text-amber-500 text-xs">
+               至 {{ getStepWaterTarget(step) }}g
+               <span class="text-amber-400 opacity-70 ml-1" *ngIf="getStepIncremental(i) > 0">
+                 (+{{ getStepIncremental(i) }}g)
+               </span>
+             </div>
           </div>
         </div>
       </div>
