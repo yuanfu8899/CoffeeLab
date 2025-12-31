@@ -69,6 +69,59 @@ export class RepositoryService {
           description: '最後注水至目標總重'
         }
       ]
+    },
+    {
+      id: 'method-clever-dripper',
+      name: '聰明濾杯（浸泡式）',
+      category: 'hybrid',
+      recommendedTemp: 90,
+      recommendedRatio: 15,
+      description: '浸泡式萃取，風味均衡穩定。適合 15-18g 粉量。',
+      steps: [
+        {
+          name: '注水',
+          type: 'pour',
+          waterEndTargetRatio: 15,
+          duration: 30,
+          description: '一次注入所有水量，確保粉層充分濕潤'
+        },
+        {
+          name: '浸泡',
+          type: 'wait',
+          duration: 120,
+          description: '等待萃取，可輕攪拌促進均勻'
+        },
+        {
+          name: '放水',
+          type: 'wait',
+          duration: 60,
+          description: '打開底閥，開始過濾'
+        }
+      ]
+    },
+    {
+      id: 'method-one-pour',
+      name: '一刀流（快速沖煮）',
+      category: 'drip',
+      recommendedTemp: 90,
+      recommendedRatio: 15,
+      description: '簡單快速，適合中深焙豆。建議 15-20g 粉量。',
+      steps: [
+        {
+          name: '悶蒸',
+          type: 'pour',
+          waterEndTargetRatio: 3,
+          duration: 30,
+          description: '快速悶蒸，粉量 × 3'
+        },
+        {
+          name: '主水流',
+          type: 'pour',
+          waterEndTargetRatio: 15,
+          duration: 90,
+          description: '穩定水流一次注完至目標總重'
+        }
+      ]
     }
   ];
 
