@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RepositoryService } from '../../services/repository';
@@ -17,6 +17,8 @@ export class TimerComponent implements OnDestroy {
   private repo = inject(RepositoryService);
   private brewLogic = inject(BrewLogicService);
 
+  private readonly TIMER_STATE_KEY = 'coffee_lab_timer_state';
+
   // Selections
   methods = this.repo.methods;
   selectedMethodId = signal<string>(this.methods()[0]?.id || '');
@@ -24,6 +26,19 @@ export class TimerComponent implements OnDestroy {
 
   // Inputs
   beanWeight = signal(15); // grams
+
+  constructor() {
+    this.loadTimerState();
+
+    effect(() => {
+      const state = {
+        selectedMethodId: this.selectedMethodId(),
+        beanWeight: this.beanWeight(),
+        lastUsedAt: new Date().toISOString()
+      };
+      localStorage.setItem(this.TIMER_STATE_KEY, JSON.stringify(state));
+    });
+  }
 
   // Calculator Output
   brewParams = computed(() => {
@@ -191,6 +206,23 @@ export class TimerComponent implements OnDestroy {
       icon: 'success',
       confirmButtonColor: '#f59e0b',
     });
+  }
+
+  private loadTimerState() {
+    const saved = localStorage.getItem(this.TIMER_STATE_KEY);
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        if (state.selectedMethodId) {
+          this.selectedMethodId.set(state.selectedMethodId);
+        }
+        if (state.beanWeight) {
+          this.beanWeight.set(state.beanWeight);
+        }
+      } catch (e) {
+        console.error('Failed to load timer state', e);
+      }
+    }
   }
 
   ngOnDestroy() {

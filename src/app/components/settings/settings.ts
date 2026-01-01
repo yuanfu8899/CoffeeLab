@@ -15,10 +15,14 @@ import Swal from 'sweetalert2';
 export class SettingsComponent {
   sheetsService = inject(GoogleSheetsService);
   repo = inject(RepositoryService);
-  
+
   // Use a signal for the input to ensure zoneless change detection works correctly
   apiUrlSignal = signal('');
-  
+
+  // Sync status
+  syncStatus = this.sheetsService.syncStatus;
+  formatSyncTime = this.sheetsService.formatSyncTime.bind(this.sheetsService);
+
   // Grinder Management State
   grinders = this.repo.grinders;
   isModalOpen = signal(false);
@@ -133,6 +137,36 @@ export class SettingsComponent {
       confirmButtonColor: '#ef4444'
     }).then(r => {
       if (r.isConfirmed) this.repo.deleteGrinder(id);
+    });
+  }
+
+  // Reset onboarding
+  resetOnboarding() {
+    Swal.fire({
+      title: '重新查看新手引導?',
+      text: '這將會重新顯示新手引導流程',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '確定',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#f59e0b',
+      background: '#1e293b',
+      color: '#e2e8f0'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('coffee_lab_onboarding_completed');
+        Swal.fire({
+          icon: 'success',
+          title: '設定完成',
+          text: '請重新載入頁面以查看新手引導',
+          confirmButtonText: '立即重新載入',
+          confirmButtonColor: '#f59e0b',
+          background: '#1e293b',
+          color: '#e2e8f0'
+        }).then(() => {
+          window.location.reload();
+        });
+      }
     });
   }
 }

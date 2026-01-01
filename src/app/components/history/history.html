@@ -1,7 +1,30 @@
 <div class="space-y-6 pb-20">
-  <h2 class="text-2xl font-bold text-amber-500 mb-4">新增沖煮紀錄</h2>
+  <!-- Tab 切換 -->
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold text-amber-500">沖煮紀錄</h2>
+    <div class="flex gap-2">
+      <button type="button" (click)="activeTab.set('add')"
+              [class.bg-amber-500]="activeTab() === 'add'"
+              [class.text-slate-900]="activeTab() === 'add'"
+              [class.bg-slate-700]="activeTab() !== 'add'"
+              [class.text-slate-300]="activeTab() !== 'add'"
+              class="px-4 py-2 rounded-lg font-bold transition">
+        新增紀錄
+      </button>
+      <button type="button" (click)="activeTab.set('list'); loadRecords()"
+              [class.bg-amber-500]="activeTab() === 'list'"
+              [class.text-slate-900]="activeTab() === 'list'"
+              [class.bg-slate-700]="activeTab() !== 'list'"
+              [class.text-slate-300]="activeTab() !== 'list'"
+              class="px-4 py-2 rounded-lg font-bold transition">
+        查看紀錄
+      </button>
+    </div>
+  </div>
 
-  <form (ngSubmit)="submit()" class="space-y-6">
+  <!-- 新增紀錄 Tab -->
+  <div *ngIf="activeTab() === 'add'">
+    <form (ngSubmit)="submit()" class="space-y-6">
     
     <!-- 1. Selection Section -->
     <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
@@ -163,10 +186,112 @@
       </div>
     </div>
 
-    <button type="submit" [disabled]="isSubmitting"
-            class="w-full bg-amber-500 text-slate-900 font-bold py-3 rounded-lg hover:bg-amber-400 transition disabled:opacity-50 shadow-lg shadow-amber-500/20">
-      {{ isSubmitting ? '傳送中...' : '儲存完整紀錄' }}
+    <button type="submit"
+            [disabled]="!canSubmit() || syncStatus().lastSyncResult === 'pending'"
+            class="w-full bg-amber-500 text-slate-900 font-bold py-3 rounded-lg hover:bg-amber-400 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber-500/20">
+      <span *ngIf="syncStatus().lastSyncResult === 'pending'">傳送中...</span>
+      <span *ngIf="syncStatus().lastSyncResult !== 'pending' && canSubmit()">儲存完整紀錄</span>
+      <span *ngIf="!canSubmit()">無法儲存 - 請先設定 API</span>
     </button>
 
-  </form>
+    </form>
+  </div>
+
+  <!-- 查看紀錄 Tab -->
+  <div *ngIf="activeTab() === 'list'">
+    <!-- 篩選器 -->
+    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-4 space-y-3">
+      <div>
+        <input [(ngModel)]="filterText"
+               type="text"
+               placeholder="搜尋豆子名稱、手法或筆記..."
+               class="w-full bg-slate-700 text-white rounded-lg p-3 border border-slate-600 focus:border-amber-500 outline-none">
+      </div>
+      <div class="flex gap-2">
+        <button type="button" (click)="filterDateRange.set('week')"
+                [class.bg-amber-500]="filterDateRange() === 'week'"
+                [class.text-slate-900]="filterDateRange() === 'week'"
+                [class.bg-slate-700]="filterDateRange() !== 'week'"
+                [class.text-slate-300]="filterDateRange() !== 'week'"
+                class="px-3 py-1 rounded text-sm transition">
+          本週
+        </button>
+        <button type="button" (click)="filterDateRange.set('month')"
+                [class.bg-amber-500]="filterDateRange() === 'month'"
+                [class.text-slate-900]="filterDateRange() === 'month'"
+                [class.bg-slate-700]="filterDateRange() !== 'month'"
+                [class.text-slate-300]="filterDateRange() !== 'month'"
+                class="px-3 py-1 rounded text-sm transition">
+          本月
+        </button>
+        <button type="button" (click)="filterDateRange.set('all')"
+                [class.bg-amber-500]="filterDateRange() === 'all'"
+                [class.text-slate-900]="filterDateRange() === 'all'"
+                [class.bg-slate-700]="filterDateRange() !== 'all'"
+                [class.text-slate-300]="filterDateRange() !== 'all'"
+                class="px-3 py-1 rounded text-sm transition">
+          全部
+        </button>
+      </div>
+    </div>
+
+    <!-- 載入中 -->
+    <div *ngIf="isLoadingRecords()" class="text-center py-12">
+      <div class="animate-spin h-8 w-8 border-4 border-amber-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+      <p class="text-slate-400">載入紀錄中...</p>
+    </div>
+
+    <!-- 紀錄列表 -->
+    <div *ngIf="!isLoadingRecords()" class="space-y-3">
+      <div *ngFor="let record of filteredRecords()"
+           class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-2">
+        <!-- Header -->
+        <div class="flex justify-between items-start">
+          <div>
+            <h4 class="text-amber-400 font-bold">{{ record.beanName }}</h4>
+            <p class="text-slate-400 text-xs">{{ formatDate(record.date) }}</p>
+          </div>
+          <div class="text-right">
+            <div class="text-xl text-amber-500">★ {{ record.sensory.overall }}</div>
+          </div>
+        </div>
+
+        <!-- Parameters -->
+        <div class="grid grid-cols-3 gap-2 text-xs text-slate-400">
+          <div>
+            <span class="text-slate-500">手法: </span>
+            <span class="text-slate-300">{{ getMethodName(record.methodId) }}</span>
+          </div>
+          <div>
+            <span class="text-slate-500">粉量: </span>
+            <span class="text-slate-300">{{ record.beanWeight }}g</span>
+          </div>
+          <div>
+            <span class="text-slate-500">水溫: </span>
+            <span class="text-slate-300">{{ record.temperature }}°C</span>
+          </div>
+        </div>
+
+        <!-- Sensory Profile -->
+        <div class="flex gap-2 text-xs flex-wrap">
+          <span class="bg-slate-700 px-2 py-1 rounded">香氣 {{ record.sensory.aroma }}</span>
+          <span class="bg-slate-700 px-2 py-1 rounded">酸值 {{ record.sensory.acidity }}</span>
+          <span class="bg-slate-700 px-2 py-1 rounded">甜感 {{ record.sensory.sweetness }}</span>
+          <span class="bg-slate-700 px-2 py-1 rounded">醇厚 {{ record.sensory.body }}</span>
+        </div>
+
+        <!-- Notes -->
+        <p *ngIf="record.notes" class="text-slate-400 text-sm italic">
+          "{{ record.notes.length > 80 ? (record.notes | slice:0:80) + '...' : record.notes }}"
+        </p>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="filteredRecords().length === 0 && !isLoadingRecords()"
+           class="text-center py-12 text-slate-500">
+        <p class="text-lg">沒有找到符合的紀錄</p>
+        <p class="text-sm mt-2">試試調整篩選條件</p>
+      </div>
+    </div>
+  </div>
 </div>

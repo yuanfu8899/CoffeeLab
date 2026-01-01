@@ -1,5 +1,5 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { BrewMethod, CoffeeBean, GrinderProfile } from '../models/coffee.types';
+import { BrewMethod, CoffeeBean, GrinderProfile, BrewRecord } from '../models/coffee.types';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +8,7 @@ export class RepositoryService {
   private readonly STORAGE_KEY_BEANS = 'coffee_lab_beans';
   private readonly STORAGE_KEY_METHODS = 'coffee_lab_methods';
   private readonly STORAGE_KEY_GRINDERS = 'coffee_lab_grinders';
+  private readonly STORAGE_KEY_RECORDS = 'coffee_lab_records';
 
   // Default Data
   private defaultGrinders: GrinderProfile[] = [
@@ -129,12 +130,14 @@ export class RepositoryService {
   beans = signal<CoffeeBean[]>(this.load(this.STORAGE_KEY_BEANS, []));
   methods = signal<BrewMethod[]>(this.load(this.STORAGE_KEY_METHODS, this.defaultMethods));
   grinders = signal<GrinderProfile[]>(this.load(this.STORAGE_KEY_GRINDERS, this.defaultGrinders));
-  
+  records = signal<BrewRecord[]>(this.load(this.STORAGE_KEY_RECORDS, []));
+
   constructor() {
     // Auto-save effects
     effect(() => localStorage.setItem(this.STORAGE_KEY_BEANS, JSON.stringify(this.beans())));
     effect(() => localStorage.setItem(this.STORAGE_KEY_METHODS, JSON.stringify(this.methods())));
     effect(() => localStorage.setItem(this.STORAGE_KEY_GRINDERS, JSON.stringify(this.grinders())));
+    effect(() => localStorage.setItem(this.STORAGE_KEY_RECORDS, JSON.stringify(this.records())));
   }
 
   private load<T>(key: string, defaultData: T): T {
@@ -188,9 +191,82 @@ export class RepositoryService {
   deleteMethod(id: string) {
     this.methods.update(list => list.filter(m => m.id !== id));
   }
-  
+
+  // Records (Brew Logs)
+  addRecord(record: BrewRecord) {
+    // 新增紀錄到列表開頭（最新的在最上面）
+    this.records.update(list => [record, ...list]);
+    return record;
+  }
+
+  updateRecord(id: string, updates: Partial<BrewRecord>) {
+    this.records.update(list => list.map(r => r.id === id ? { ...r, ...updates } : r));
+  }
+
+  deleteRecord(id: string) {
+    this.records.update(list => list.filter(r => r.id !== id));
+  }
+
+  // 同步雲端資料到本地（合併策略：雲端資料優先，但保留本地獨有資料）
+  syncRecordsFromCloud(cloudRecords: BrewRecord[]) {
+    const localRecords = this.records();
+    const cloudIds = new Set(cloudRecords.map(r => r.id));
+
+    // 保留本地獨有的紀錄（雲端沒有的）
+    const localOnlyRecords = localRecords.filter(r => !cloudIds.has(r.id));
+
+    // 合併：雲端資料 + 本地獨有資料
+    const merged = [...cloudRecords, ...localOnlyRecords];
+
+    // 按日期排序（最新在前）
+    merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    this.records.set(merged);
+  }
+
+  // Load sample data for onboarding
+  loadSampleData() {
+    const sampleBeans: CoffeeBean[] = [
+      {
+        id: crypto.randomUUID(),
+        name: '耶加雪菲 G1 水洗',
+        roastLevel: 'light',
+        shop: '衣索比亞',
+        purchaseDate: new Date().toISOString(),
+        weight: 250,
+        flavorNotes: ['花香', '柑橘', '紅茶'],
+        isActive: true
+      },
+      {
+        id: crypto.randomUUID(),
+        name: '哥倫比亞 慧蘭',
+        roastLevel: 'medium',
+        shop: '哥倫比亞',
+        purchaseDate: new Date().toISOString(),
+        weight: 250,
+        flavorNotes: ['堅果', '焦糖', '巧克力'],
+        isActive: true
+      }
+    ];
+
+    this.beans.set(sampleBeans);
+
+    // Show success message
+    import('sweetalert2').then(Swal => {
+      Swal.default.fire({
+        icon: 'success',
+        title: '範例資料已載入',
+        text: '已加入 2 個範例咖啡豆，現在可以開始使用 Timer 了！',
+        confirmButtonColor: '#f59e0b',
+        background: '#1e293b',
+        color: '#e2e8f0'
+      });
+    });
+  }
+
   // Helpers
   getBean(id: string) { return this.beans().find(b => b.id === id); }
   getMethod(id: string) { return this.methods().find(m => m.id === id); }
   getGrinder(id: string) { return this.grinders().find(g => g.id === id); }
+  getRecord(id: string) { return this.records().find(r => r.id === id); }
 }

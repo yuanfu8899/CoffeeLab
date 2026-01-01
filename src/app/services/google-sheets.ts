@@ -1,7 +1,14 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, effect } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+
+export interface SyncStatus {
+  isConnected: boolean;
+  lastSyncTime: string | null;
+  lastSyncResult: 'success' | 'error' | 'pending' | null;
+  errorMessage?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +16,27 @@ import { catchError, map } from 'rxjs/operators';
 export class GoogleSheetsService {
   private http = inject(HttpClient);
   private readonly STORAGE_KEY = 'coffee_lab_api_url';
-  
+  private readonly SYNC_STATUS_KEY = 'coffee_lab_last_sync';
+
   apiUrl = signal<string>(localStorage.getItem(this.STORAGE_KEY) || '');
 
-  constructor() { }
+  syncStatus = signal<SyncStatus>({
+    isConnected: false,
+    lastSyncTime: null,
+    lastSyncResult: null
+  });
+
+  constructor() {
+    this.loadSyncStatus();
+
+    // Monitor connection status
+    effect(() => {
+      this.syncStatus.update(s => ({
+        ...s,
+        isConnected: this.apiUrl().length > 0
+      }));
+    });
+  }
 
   setApiUrl(url: string) {
     this.apiUrl.set(url);
@@ -33,6 +57,9 @@ export class GoogleSheetsService {
     const url = this.apiUrl();
     if (!url) return of(false);
 
+    // Set pending status
+    this.syncStatus.update(s => ({ ...s, lastSyncResult: 'pending' }));
+
     // 包裝成後端期待的格式
     const payload = {
       type: type,
@@ -44,13 +71,19 @@ export class GoogleSheetsService {
         try {
           // 嘗試解析後端回傳的 JSON (雖然 responseType 是 text)
           const res = JSON.parse(response);
-          return res.status === 'success';
+          const success = res.status === 'success';
+          this.updateSyncStatus(success);
+          return success;
         } catch (e) {
           // 如果後端回傳的是純文字但狀態碼是 200，通常也算成功
+          this.updateSyncStatus(true);
           return true;
         }
       }),
-      catchError(() => of(false))
+      catchError((error) => {
+        this.updateSyncStatus(false, error.message);
+        return of(false);
+      })
     );
   }
 
@@ -60,11 +93,47 @@ export class GoogleSheetsService {
   getAllData(): Observable<any> {
     const url = this.apiUrl();
     if (!url) return of(null);
-    
+
     // 呼叫 doGet?action=getAll
     return this.http.get(`${url}?action=getAll`).pipe(
       catchError(() => of(null))
     );
+  }
+
+  private updateSyncStatus(success: boolean, errorMessage?: string) {
+    const status: SyncStatus = {
+      isConnected: true,
+      lastSyncTime: new Date().toISOString(),
+      lastSyncResult: success ? 'success' : 'error',
+      errorMessage: success ? undefined : errorMessage
+    };
+    this.syncStatus.set(status);
+    localStorage.setItem(this.SYNC_STATUS_KEY, JSON.stringify(status));
+  }
+
+  private loadSyncStatus() {
+    const saved = localStorage.getItem(this.SYNC_STATUS_KEY);
+    if (saved) {
+      try {
+        const status = JSON.parse(saved);
+        this.syncStatus.set(status);
+      } catch (e) {
+        console.error('Failed to load sync status', e);
+      }
+    }
+  }
+
+  formatSyncTime(isoTime: string | null): string {
+    if (!isoTime) return '';
+    const date = new Date(isoTime);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+
+    if (minutes < 1) return '剛剛';
+    if (minutes < 60) return `${minutes} 分鐘前`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} 小時前`;
+    return `${Math.floor(minutes / 1440)} 天前`;
   }
 }
 

@@ -17,12 +17,35 @@
         已連結
       </span>
     </label>
-    <input type="text" [ngModel]="apiUrlSignal()" (ngModelChange)="apiUrlSignal.set($event)" 
+    <input type="text" [ngModel]="apiUrlSignal()" (ngModelChange)="apiUrlSignal.set($event)"
            placeholder="請貼上 https://script.google.com/macros/s/..."
            [class.border-amber-500]="!apiUrlSignal()"
            [class.border-slate-700]="apiUrlSignal()"
-           class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none mb-4 border placeholder:text-slate-500 transition-colors">
-    
+           class="w-full bg-slate-700 text-white rounded p-3 focus:ring-2 focus:ring-amber-500 outline-none mb-2 border placeholder:text-slate-500 transition-colors">
+
+    <!-- Sync Status Indicator -->
+    <div class="mb-4 flex items-center gap-2 text-xs">
+      <span *ngIf="!sheetsService.apiUrl()" class="text-slate-500">
+        🔌 未設定雲端連結
+      </span>
+      <span *ngIf="sheetsService.apiUrl() && syncStatus().lastSyncResult === 'success'"
+            class="text-green-400 flex items-center gap-1">
+        ✓ 上次同步: {{ formatSyncTime(syncStatus().lastSyncTime) }}
+      </span>
+      <span *ngIf="syncStatus().lastSyncResult === 'pending'"
+            class="text-amber-400 flex items-center gap-1">
+        <svg class="animate-spin h-3 w-3" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        同步中...
+      </span>
+      <span *ngIf="syncStatus().lastSyncResult === 'error'"
+            class="text-red-400">
+        ✕ 同步失敗
+      </span>
+    </div>
+
     <div class="flex gap-4">
       <button (click)='clearConfig()' class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-red-900/50 hover:text-red-400 transition">
         解除連結
@@ -61,7 +84,18 @@
     </div>
   </div>
 
-  <!-- 3. About -->
+  <!-- 3. Onboarding -->
+  <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+    <h3 class="text-lg font-semibold text-slate-200 mb-2">新手引導</h3>
+    <p class="text-slate-400 text-sm mb-4">
+      重新查看應用程式的新手引導流程，了解如何使用咖啡實驗室的各項功能。
+    </p>
+    <button (click)="resetOnboarding()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-500 transition">
+      🎯 重新查看新手引導
+    </button>
+  </div>
+
+  <!-- 4. About -->
   <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
     <h3 class="text-lg font-semibold text-slate-200 mb-2">關於</h3>
     <p class="text-slate-400 text-sm leading-relaxed">

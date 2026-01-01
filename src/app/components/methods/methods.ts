@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RepositoryService } from '../../services/repository';
 import { GoogleSheetsService } from '../../services/google-sheets';
 import { BrewLogicService } from '../../services/brew-logic';
+import { ExportService } from '../../services/export';
 import { BrewMethod, BrewStep } from '../../models/coffee.types';
 import Swal from 'sweetalert2';
 
@@ -13,9 +14,12 @@ import Swal from 'sweetalert2';
   templateUrl: './methods.html',
   styleUrl: './methods.css'
 })
-export class MethodsComponent {
+export class MethodsComponent implements OnInit {
   repo = inject(RepositoryService);
   sheets = inject(GoogleSheetsService);
+  exportService = inject(ExportService);
+  brewLogic = inject(BrewLogicService);
+
   methods = this.repo.methods;
 
   isModalOpen = signal(false);
@@ -24,10 +28,12 @@ export class MethodsComponent {
   previewDose = signal(20);  // 預覽用粉量（預設 20g）
   inputMode = signal<'cumulative' | 'incremental'>('cumulative');  // 輸入模式：累積/增量
 
+  // Share modal state
+  showShareModal = signal(false);
+  shareUrl = signal('');
+
   form: Partial<BrewMethod> = this.getEmptyForm();
   tempSteps: BrewStep[] = [];
-
-  brewLogic = inject(BrewLogicService);
 
   getEmptyForm(): Partial<BrewMethod> {
     return {
@@ -72,7 +78,9 @@ export class MethodsComponent {
    * 判斷步驟是否使用倍率模式
    */
   isRatioMode(step: BrewStep): boolean {
-    return step.waterEndTargetRatio !== undefined && step.waterEndTargetRatio > 0;
+    // 只要 waterEndTargetRatio 有定義就是倍率模式，不管值是多少
+    // 這樣用戶在編輯輸入框時不會意外切換模式
+    return step.waterEndTargetRatio !== undefined;
   }
 
   /**
@@ -81,8 +89,9 @@ export class MethodsComponent {
   setStepMode(index: number, mode: 'ratio' | 'absolute') {
     const step = this.tempSteps[index];
     if (mode === 'ratio') {
-      // 切換到倍率模式：如果沒有倍率值，初始化為 1
-      if (step.waterEndTargetRatio === undefined || step.waterEndTargetRatio === 0) {
+      // 切換到倍率模式：只有在完全未定義時才初始化為 1
+      // 如果已經有值（即使是 0），就保持不變
+      if (step.waterEndTargetRatio === undefined) {
         step.waterEndTargetRatio = 1;
       }
     } else {
@@ -187,6 +196,119 @@ export class MethodsComponent {
       const incrementalRatio = this.getIncrementalRatio(i);
       const previousCumulative = this.tempSteps[i - 1].waterEndTargetRatio || 0;
       this.tempSteps[i].waterEndTargetRatio = previousCumulative + incrementalRatio;
+    }
+  }
+
+  // === Share & Export Methods ===
+
+  ngOnInit() {
+    this.checkImportFromUrl();
+  }
+
+  // Export method to JSON file
+  exportMethod(method: BrewMethod) {
+    this.exportService.exportMethod(method);
+    Swal.fire({
+      toast: true,
+      position: 'bottom-end',
+      icon: 'success',
+      title: '已下載 JSON 檔案',
+      showConfirmButton: false,
+      timer: 2000,
+      background: '#1e293b',
+      color: '#e2e8f0'
+    });
+  }
+
+  // Share method (generate link)
+  shareMethod(method: BrewMethod) {
+    const url = this.exportService.generateShareLink(method);
+    this.shareUrl.set(url);
+    this.showShareModal.set(true);
+  }
+
+  // Copy to clipboard
+  async copyToClipboard(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'success',
+        title: '已複製連結',
+        showConfirmButton: false,
+        timer: 2000,
+        background: '#1e293b',
+        color: '#e2e8f0'
+      });
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: '複製失敗',
+        text: '請手動複製連結',
+        confirmButtonColor: '#f59e0b'
+      });
+    }
+  }
+
+  // Import method from file
+  async importMethod() {
+    try {
+      const method = await this.exportService.importMethodFromFile();
+      this.repo.addMethod(method);
+      Swal.fire({
+        icon: 'success',
+        title: '匯入成功',
+        text: `已匯入手法：${method.name}`,
+        confirmButtonColor: '#f59e0b'
+      });
+    } catch (err: any) {
+      Swal.fire({
+        icon: 'error',
+        title: '匯入失敗',
+        text: err.message || '無法讀取 JSON 檔案',
+        confirmButtonColor: '#f59e0b'
+      });
+    }
+  }
+
+  // Check URL for import on init
+  private checkImportFromUrl() {
+    const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+    const importData = urlParams.get('import');
+
+    if (importData) {
+      const method = this.exportService.parseShareLink(importData);
+      if (method) {
+        Swal.fire({
+          title: '匯入手法',
+          text: `是否要匯入「${method.name}」？`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: '匯入',
+          cancelButtonText: '取消',
+          confirmButtonColor: '#f59e0b'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.repo.addMethod(method);
+            Swal.fire({
+              icon: 'success',
+              title: '匯入成功',
+              text: `已加入手法：${method.name}`,
+              confirmButtonColor: '#f59e0b'
+            });
+            // Clear URL param
+            window.history.replaceState({}, '', window.location.pathname + '#/methods');
+          }
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: '匯入失敗',
+          text: '無效的分享連結',
+          confirmButtonColor: '#f59e0b'
+        });
+      }
     }
   }
 }

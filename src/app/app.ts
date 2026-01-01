@@ -1,11 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { GoogleSheetsService } from './services/google-sheets';
+import { OnboardingComponent } from './components/onboarding/onboarding';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, OnboardingComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

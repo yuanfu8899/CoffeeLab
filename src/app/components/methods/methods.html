@@ -1,9 +1,14 @@
 <div class="space-y-6 pb-20">
   <div class="flex justify-between items-center mb-4">
     <h2 class="text-2xl font-bold text-amber-500">沖煮手法編輯</h2>
-    <button (click)="openAdd()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-lg font-bold hover:bg-amber-400 transition">
-      + 新增手法
-    </button>
+    <div class="flex gap-2">
+      <button (click)="importMethod()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-500 transition">
+        📥 匯入手法
+      </button>
+      <button (click)="openAdd()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-lg font-bold hover:bg-amber-400 transition">
+        + 新增手法
+      </button>
+    </div>
   </div>
 
   <!-- Methods List -->
@@ -34,12 +39,18 @@
         </div>
       </div>
 
-      <div class="flex gap-2 mt-4 pt-4 border-t border-slate-700 justify-end">
-        <button (click)="openEdit(m)" class="px-3 py-1 text-slate-300 hover:text-amber-500 transition text-sm">
-          編輯詳情
+      <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-700">
+        <button (click)="exportMethod(m)" class="bg-slate-700 text-slate-300 px-3 py-2 rounded text-sm hover:bg-slate-600 transition flex items-center justify-center gap-1">
+          <span>📤</span> 匯出
         </button>
-        <button (click)="delete(m.id)" class="px-3 py-1 text-slate-300 hover:text-red-500 transition text-sm">
-          刪除
+        <button (click)="shareMethod(m)" class="bg-amber-500 text-slate-900 px-3 py-2 rounded text-sm font-bold hover:bg-amber-400 transition flex items-center justify-center gap-1">
+          <span>🔗</span> 分享
+        </button>
+        <button (click)="openEdit(m)" class="bg-slate-700 text-slate-300 px-3 py-2 rounded text-sm hover:bg-slate-600 transition flex items-center justify-center gap-1">
+          <span>✏️</span> 編輯詳情
+        </button>
+        <button (click)="delete(m.id)" class="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-500 transition flex items-center justify-center gap-1">
+          <span>🗑️</span> 刪除
         </button>
       </div>
     </div>
@@ -247,6 +258,40 @@
     <div class="flex gap-4 mt-6 pt-4 border-t border-slate-700">
       <button (click)="isModalOpen.set(false)" class="flex-1 bg-slate-800 text-slate-300 py-2 rounded-lg hover:bg-slate-700">取消</button>
       <button (click)="save()" class="flex-1 bg-amber-500 text-slate-900 font-bold py-2 rounded-lg hover:bg-amber-400">儲存變更</button>
+    </div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div *ngIf="showShareModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+  <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-700 shadow-2xl p-6">
+    <h3 class="text-xl font-bold text-amber-500 mb-4">分享手法</h3>
+
+    <p class="text-slate-400 text-sm mb-2">複製此連結分享給朋友：</p>
+    <div class="flex gap-2 mb-4">
+      <input [value]="shareUrl()"
+             readonly
+             class="flex-1 bg-slate-800 text-white p-3 rounded-lg border border-slate-700 text-sm">
+      <button (click)="copyToClipboard(shareUrl())"
+              class="bg-amber-500 text-slate-900 px-4 py-2 rounded-lg font-bold hover:bg-amber-400 transition">
+        複製
+      </button>
+    </div>
+
+    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-xs text-slate-400 mb-4">
+      <p class="mb-1">💡 使用方式：</p>
+      <ul class="list-disc list-inside space-y-1 ml-2">
+        <li>將連結傳送給朋友</li>
+        <li>對方打開連結後會自動匯入手法</li>
+        <li>也可以選擇下載 JSON 檔案分享</li>
+      </ul>
+    </div>
+
+    <div class="flex justify-end">
+      <button (click)="showShareModal.set(false)"
+              class="text-slate-400 hover:text-slate-300 px-4 py-2">
+        關閉
+      </button>
     </div>
   </div>
 </div>
